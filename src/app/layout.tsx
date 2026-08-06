@@ -3,8 +3,16 @@ import "./globals.css";
 import { Providers } from "@/components/Providers";
 import { Navbar } from "@/components/Navbar";
 
+const getBaseUrl = () => {
+  if (process.env.NEXTAUTH_URL) return process.env.NEXTAUTH_URL;
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  return "http://localhost:3000";
+};
+
+const siteUrl = getBaseUrl();
+
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXTAUTH_URL || "http://localhost:3000"),
+  metadataBase: new URL(siteUrl),
   title: "PrHelper | 3D AI Marketing Studio",
   description:
     "Generate structured Instagram Reel scripts, YouTube Shorts breakdowns, and studio image prompts with 3D Sky Blue Claymorphism.",
@@ -16,7 +24,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "PrHelper | 3D AI Marketing Studio",
     description: "Generate ready-to-use marketing scripts, reels, shorts & studio images in 1 click.",
-    url: "http://localhost:3000",
+    url: siteUrl,
     siteName: "PrHelper",
     images: [
       {
