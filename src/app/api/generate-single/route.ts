@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { sql } from "@/db";
 import { queryStyleLibrary } from "@/lib/rag";
+import { generateSingleItem } from "@/lib/gemini";
 import { generateImageForPrompt } from "@/lib/images";
 
 export async function POST(req: NextRequest) {
@@ -121,30 +122,16 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // High quality fallback if Gemini API is busy or unconfigured
+    // High-intelligence domain-aware synthesizer if Gemini API is busy or unconfigured
     if (!generatedItem) {
-      if (type === "reel") {
-        generatedItem = {
-          title: `The ${businessName} Experience`,
-          prompt_text: `Hook (0-3s): "Here is why everyone in town is obsessed with ${businessName}."\n\nVisual: Ultra-clean 4K macro dolly shot showing the fine details of ${businessTopic}. Fast transition to customer genuine reactions.\n\nScreen split highlighting why ordinary alternatives fail vs ${businessName}'s perfection.\n\nCTA (25-30s): "Tap the link in bio or visit us today!"`,
-          description: `Discover the difference with ${businessName}. ✨ Tap link in bio! #${businessName.replace(/\s+/g, '')} #Trending`,
-          estimated_duration_seconds: durationSeconds,
-        };
-      } else if (type === "short") {
-        generatedItem = {
-          title: `15-Second Breakdown: ${businessName}`,
-          prompt_text: `Beat 1 (0-3s): "Stop doing this if you want real results!" (Dramatic fast zoom on problem).\n\nBeat 2 (3-8s): 3 rapid cuts showing how ${businessName} solves it with ${businessTopic}.\n\nBeat 3 (8-13s): Satisfying finished result reveal.\n\nBeat 4 (13-15s): "Drop a comment below for the full guide!"`,
-          description: `Quick tips from ${businessName}! ⚡ Subscribe for daily breakdowns. #Shorts #${businessName.replace(/\s+/g, '')}`,
-          estimated_duration_seconds: 15,
-        };
-      } else {
-        generatedItem = {
-          title: `Hero Commercial Showcase: ${businessName}`,
-          prompt_text: `Commercial studio hero product photography for ${businessName}, featuring ${businessTopic}, soft cinematic rim lighting, polished acrylic surface, dewy botanical accents, minimalist aesthetic, Hasselblad 8k photo.`,
-          description: `High-resolution studio visual ready for Instagram, Facebook, and Web banners.`,
-          aspect_ratio: "1:1",
-        };
-      }
+      generatedItem = generateSingleItem(
+        type as "reel" | "short" | "image",
+        businessName,
+        businessTopic,
+        industry,
+        tone,
+        durationSeconds
+      );
     }
 
     // 6. Insert generated prompt into database

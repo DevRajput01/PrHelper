@@ -89,15 +89,33 @@ body {
   color: #0f172a;
 }
 
-/* Debossed Inset Input / Search Capsule */
+/* Debossed Inset Input / Search Capsule (Pill Shape for inputs) */
 .clay-inset-input {
-  background: #f1ede6;
+  background: #ffffff;
   border-radius: 9999px;
   box-shadow: 
-    inset 3px 3px 6px 0 rgba(150, 135, 120, 0.2),
-    inset -3px -3px 6px 0 rgba(255, 255, 255, 0.9),
-    0 1px 2px 0 rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(210, 195, 180, 0.3);
+    inset 2px 2px 5px 0 rgba(140, 160, 180, 0.12),
+    inset -2px -2px 5px 0 rgba(255, 255, 255, 0.9),
+    0 1px 3px 0 rgba(0, 0, 0, 0.04);
+  border: 1.5px solid #e2e8f0;
+  transition: all 0.2s ease;
+}
+
+.clay-inset-input:focus-within {
+  border-color: #38bdf8;
+  box-shadow: 
+    0 0 0 3px rgba(56, 189, 248, 0.2),
+    inset 1px 1px 3px 0 rgba(140, 160, 180, 0.1);
+}
+
+/* Debossed Inset Card (Structured Rounded Rectangle for Multi-line Content) */
+.clay-inset-card {
+  background: #f8fafc;
+  border-radius: 20px !important;
+  box-shadow: 
+    inset 2px 2px 5px 0 rgba(140, 160, 180, 0.1),
+    inset -2px -2px 5px 0 rgba(255, 255, 255, 0.95);
+  border: 1.5px solid #e2e8f0;
 }
 
 /* Soft Clay Banner (Peach & Sky Gradient Card) */

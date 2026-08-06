@@ -245,7 +245,7 @@ export default function LibraryPage() {
                   </h3>
                 </div>
 
-                <div className="clay-inset-input p-3.5 rounded-2xl text-xs text-slate-800 line-clamp-4 leading-relaxed font-medium">
+                <div className="clay-inset-card p-3.5 text-xs text-slate-800 line-clamp-4 leading-relaxed font-medium">
                   {prompt.prompt_text}
                 </div>
               </div>
