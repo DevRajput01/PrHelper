@@ -1,0 +1,43 @@
+{
+  "name": "adreel",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
+    "db:seed": "tsx scripts/seed-style-library.ts"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^0.9.4",
+    "bcryptjs": "^2.4.3",
+    "canvas-confetti": "^1.9.3",
+    "clsx": "^2.1.1",
+    "dotenv": "^16.4.5",
+    "drizzle-orm": "^0.30.10",
+    "lucide-react": "^0.378.0",
+    "next": "14.2.4",
+    "next-auth": "^4.24.7",
+    "postgres": "^3.4.4",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "swr": "^2.2.5",
+    "tailwind-merge": "^2.3.0"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/canvas-confetti": "^1.6.4",
+    "@types/node": "^20.14.2",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "autoprefixer": "^10.4.19",
+    "drizzle-kit": "^0.21.4",
+    "postcss": "^8.4.38",
+    "tailwindcss": "^3.4.4",
+    "tsx": "^4.11.0",
+    "typescript": "^5.4.5"
+  }
+}

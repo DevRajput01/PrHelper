@@ -1,0 +1,225 @@
+{
+  "name": "AdReel Marketing Content Generation Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "generate",
+        "responseMode": "onReceived",
+        "responseData": "allEntries",
+        "options": {}
+      },
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [100, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://ai-microservice:8000/embed",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "={{ $json.body.businessName }} {{ $json.body.description }} {{ $json.body.filters.topic || '' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Get Embeddings Microservice",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [320, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id, content, industry, (1 - (embedding <=> ('[' || array_to_string($1::real[], ',') || ']')::vector)) as similarity FROM style_library ORDER BY embedding <=> ('[' || array_to_string($1::real[], ',') || ']')::vector ASC LIMIT 5;",
+        "additionalFields": {
+          "queryParams": "={{ $json.embedding }}"
+        }
+      },
+      "name": "Query pgvector Style Library",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.3,
+      "position": [540, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "key",
+              "value": "={{ $env.GEMINI_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "contents",
+              "value": "={{ [{\n  \"role\": \"user\",\n  \"parts\": [{\n    \"text\": \"You are a marketing content strategist for small businesses. Output ONLY valid JSON matching this schema: { reel_prompts: [...], shorts_prompts: [...], image_prompts: [...], video_status_note: '...' }\\n\\nBusiness: \" + $('Webhook Trigger').first().json.body.businessName + \"\\nDescription: \" + $('Webhook Trigger').first().json.body.description + \"\\nRAG Inspiration: \" + $json.map(r => r.content).join('\\n---\\n')\n  }]\n}] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Gemini LLM Generation",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [760, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const responseText = $input.first().json.candidates[0].content.parts[0].text;\nlet parsed;\ntry {\n  const clean = responseText.replace(/```json/g, '').replace(/```/g, '').trim();\n  parsed = JSON.parse(clean);\n} catch (e) {\n  parsed = { reel_prompts: [], shorts_prompts: [], image_prompts: [] };\n}\n\nreturn [{ json: { ...parsed, requestId: $('Webhook Trigger').first().json.body.requestId } }];"
+      },
+      "name": "Parse & Validate JSON Schema",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [980, 300]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "image_prompts",
+        "options": {}
+      },
+      "name": "Split Image Prompts Batch",
+      "type": "n8n-nodes-base.itemLists",
+      "typeVersion": 3,
+      "position": [1200, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://ai-microservice:8000/generate-image",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "prompt",
+              "value": "={{ $json.prompt_text }}"
+            },
+            {
+              "name": "aspect_ratio",
+              "value": "={{ $json.aspect_ratio || '1:1' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Generate Image SD Microservice",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1420, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:3000/api/webhook/n8n",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "requestId",
+              "value": "={{ $('Webhook Trigger').first().json.body.requestId }}"
+            },
+            {
+              "name": "status",
+              "value": "complete"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Notify Next.js Callback",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1640, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Embeddings Microservice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Embeddings Microservice": {
+      "main": [
+        [
+          {
+            "node": "Query pgvector Style Library",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query pgvector Style Library": {
+      "main": [
+        [
+          {
+            "node": "Gemini LLM Generation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini LLM Generation": {
+      "main": [
+        [
+          {
+            "node": "Parse & Validate JSON Schema",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse & Validate JSON Schema": {
+      "main": [
+        [
+          {
+            "node": "Split Image Prompts Batch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Image Prompts Batch": {
+      "main": [
+        [
+          {
+            "node": "Generate Image SD Microservice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Image SD Microservice": {
+      "main": [
+        [
+          {
+            "node": "Notify Next.js Callback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

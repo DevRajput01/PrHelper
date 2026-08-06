@@ -1,0 +1,45 @@
+{
+  "name": "AdReel Weekly RAG Promotion Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 0 * * 0"
+            }
+          ]
+        }
+      },
+      "name": "Weekly Schedule (Sunday 00:00)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [100, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:3000/api/rag/promote",
+        "options": {}
+      },
+      "name": "Trigger RAG Promotion API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [340, 300]
+    }
+  ],
+  "connections": {
+    "Weekly Schedule (Sunday 00:00)": {
+      "main": [
+        [
+          {
+            "node": "Trigger RAG Promotion API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
