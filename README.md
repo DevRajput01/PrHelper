@@ -32,7 +32,7 @@ npm install
 ### 2. Configure Environment Variables
 Create a `.env.local` file (or use existing):
 ```env
-DATABASE_URL="postgresql://neondb_owner:npg_v3Nsir8bypgF@ep-soft-leaf-azvxufgq-pooler.c-3.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+DATABASE_URL="postgresql://neondbquire"
 NEXTAUTH_SECRET="adreel_super_secret_session_key_2026_marketing_ai"
 NEXTAUTH_URL="http://localhost:3000"
 GEMINI_API_KEY="" # Optional free tier key
