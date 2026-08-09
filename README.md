@@ -2,6 +2,8 @@
 
 AdReel is a full-stack, free-tier marketing generation platform that turns business descriptions and content filters into production-ready **Instagram Reel scripts**, **YouTube Shorts scene breakdowns**, and **text-to-image studio visual prompts** with generated visuals.
 ![Uploading image.png…]()
+![Uploading image.png…]()
+
 
 ---
 
